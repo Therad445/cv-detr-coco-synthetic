@@ -1,0 +1,10 @@
+data_root: data/coco10
+model_name: facebook/detr-resnet-50
+output_dir: runs/detr_coco10
+epochs: 5
+batch_size: 2
+lr: 1e-5
+lr_backbone: 1e-6
+weight_decay: 1e-4
+num_workers: 4
+score_threshold: 0.5
