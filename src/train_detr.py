@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from dataset import CocoDetrDataset, make_collate_fn
 from modeling import get_model, get_processor
-from utils import EmptyProfiler, append_csv, as_float, mkdir, set_seed, to_device
+from utils import EmptyProfiler, append_csv, as_float, mkdir, set_seed
 
 
 TRAIN_COLUMNS = ['epoch', 'step', 'loss_total', 'loss_ce', 'loss_bbox', 'loss_giou', 'cardinality_error']
@@ -33,6 +33,19 @@ def make_optimizer(model, lr, lr_backbone, weight_decay):
         weight_decay=weight_decay,
     )
 
+
+
+
+def move_labels_to_device(labels, device):
+    # HuggingFace DETR expects a list of dictionaries.
+    # Each tensor inside every target must be on the same device as pixel_values.
+    moved = []
+    for target in labels:
+        moved.append({
+            key: value.to(device) if hasattr(value, 'to') else value
+            for key, value in target.items()
+        })
+    return moved
 
 def make_profiler(args, device, enabled):
     if not enabled:
@@ -99,7 +112,7 @@ def train_epoch(model, loader, optim, writer, args, device, epoch, global_step):
     with make_profiler(args, device, profile_this_epoch) as prof:
         pbar = tqdm(loader, desc=f'train {epoch}')
         for batch in pbar:
-            labels = to_device(batch['labels'], device)
+            labels = move_labels_to_device(batch['labels'], device)
             pixel_values = batch['pixel_values'].to(device)
             pixel_mask = batch['pixel_mask'].to(device) if batch['pixel_mask'] is not None else None
 
@@ -150,6 +163,8 @@ def main():
     p.add_argument('--score-threshold', type=float, default=0.5)
     p.add_argument('--seed', type=int, default=42)
     p.add_argument('--profile', action='store_true')
+    p.add_argument('--resume', type=Path, default=None,
+                   help='path to checkpoint .pt; useful when Colab runtime dies')
     p.add_argument('--profile-steps', type=int, default=5)
     p.add_argument('--device', default='cuda' if torch.cuda.is_available() else 'cpu')
     args = p.parse_args()
@@ -178,11 +193,22 @@ def main():
 
     best_map = -1.0
     global_step = 0
+    start_epoch = 1
+
+    if args.resume is not None and args.resume.exists():
+        ckpt = torch.load(args.resume, map_location=device, weights_only=False)
+        model.load_state_dict(ckpt['model_state'])
+        if 'optimizer_state' in ckpt:
+            optim.load_state_dict(ckpt['optimizer_state'])
+        start_epoch = int(ckpt.get('epoch', 0)) + 1
+        best_map = float(ckpt.get('metrics', {}).get('map', -1.0))
+        print('resumed from:', args.resume)
+        print('start epoch:', start_epoch)
     print('device:', device)
     print('train/val:', len(train_ds), len(val_ds))
     print('labels:', id2label)
 
-    for epoch in range(1, args.epochs + 1):
+    for epoch in range(start_epoch, args.epochs + 1):
         global_step, train_means = train_epoch(model, train_loader, optim, writer, args, device, epoch, global_step)
         for k, v in train_means.items():
             writer.add_scalar('epoch_train/' + k, v, epoch)
@@ -192,7 +218,10 @@ def main():
         for k, v in metrics.items():
             writer.add_scalar('val/' + k, v, epoch)
 
-        save_ckpt(args.output_dir / 'checkpoints' / f'epoch_{epoch:03d}.pt', model, optim, epoch, args, metrics)
+        epoch_ckpt = args.output_dir / 'checkpoints' / f'epoch_{epoch:03d}.pt'
+        save_ckpt(epoch_ckpt, model, optim, epoch, args, metrics)
+        # latest.pt is convenient for Colab resume after runtime disconnects.
+        save_ckpt(args.output_dir / 'checkpoints' / 'latest.pt', model, optim, epoch, args, metrics)
         if metrics.get('map', -1.0) > best_map:
             best_map = metrics.get('map', -1.0)
             save_ckpt(args.output_dir / 'checkpoints' / 'best.pt', model, optim, epoch, args, metrics)

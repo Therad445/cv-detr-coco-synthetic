@@ -6,12 +6,27 @@ import numpy as np
 import torch
 from sklearn.metrics import accuracy_score, f1_score
 from torch import nn
-from torch.utils.data import ConcatDataset, DataLoader
+from torch.utils.data import ConcatDataset, DataLoader, Dataset, Dataset
 from torch.utils.tensorboard import SummaryWriter
 from torchvision import datasets, models, transforms
 from tqdm import tqdm
 
 from utils import mkdir, set_seed
+
+
+class RemapTargets(Dataset):
+    def __init__(self, base_ds, idx_map):
+        self.base_ds = base_ds
+        self.idx_map = idx_map
+        self.classes = getattr(base_ds, "classes", None)
+
+    def __len__(self):
+        return len(self.base_ds)
+
+    def __getitem__(self, idx):
+        x, y = self.base_ds[idx]
+        return x, self.idx_map[int(y)]
+
 
 
 def tfm(train):
@@ -109,12 +124,24 @@ def main():
 
     real_train = datasets.ImageFolder(args.real_root / 'train', transform=tfm(True))
     real_val = datasets.ImageFolder(args.real_root / 'val', transform=tfm(False))
-    synth = datasets.ImageFolder(args.synthetic_root, transform=tfm(True))
+    synth_raw = datasets.ImageFolder(args.synthetic_root, transform=tfm(True))
 
     if real_train.classes != real_val.classes:
         raise ValueError('train/val folders have different classes')
-    if synth.classes != real_train.classes:
-        raise ValueError(f'synthetic classes must match real classes: {synth.classes} vs {real_train.classes}')
+
+    missing = sorted(set(synth_raw.classes) - set(real_train.classes))
+    if missing:
+        raise ValueError(f'synthetic classes are absent in real classes: {missing}')
+
+    synth_idx_to_real_idx = {
+        synth_raw.class_to_idx[class_name]: real_train.class_to_idx[class_name]
+        for class_name in synth_raw.classes
+    }
+    synth = RemapTargets(synth_raw, synth_idx_to_real_idx)
+
+    print('real classes:', real_train.classes)
+    print('synthetic classes:', synth_raw.classes)
+    print('synthetic target remap:', synth_idx_to_real_idx)
 
     rows = []
     r1 = run_exp('real_only', real_train, real_val, real_train.classes, args)

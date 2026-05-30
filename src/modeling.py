@@ -30,7 +30,7 @@ def get_model(model_name, data_root):
 
 
 def load_model_from_checkpoint(ckpt_path, data_root, model_name=None):
-    ckpt = torch.load(ckpt_path, map_location='cpu')
+    ckpt = torch.load(ckpt_path, map_location='cpu', weights_only=False)
     saved_args = ckpt.get('args', {})
     model_name = model_name or saved_args.get('model_name') or 'facebook/detr-resnet-50'
     model, id2label, label2id = get_model(model_name, data_root)

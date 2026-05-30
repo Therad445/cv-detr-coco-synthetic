@@ -1,15 +1,19 @@
 __pycache__/
 *.pyc
-.venv/
-.env
 .ipynb_checkpoints/
+.DS_Store
 
 data/
-runs/
-outputs/
-checkpoints/
+datasets/
+
 *.pt
 *.pth
 *.ckpt
+*.safetensors
 
-.DS_Store
+.venv/
+venv/
+.env
+
+.cache/
+wandb/
