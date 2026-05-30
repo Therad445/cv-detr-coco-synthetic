@@ -1,26 +1,74 @@
-# HW: DETR на COCO-subset и синтетика через ControlNet
+# CV HW: DETR на COCO-subset + анализ ошибок
 
-В проекте две части.
+Учебный проект по computer vision: fine-tuning DETR на небольшом COCO-subset, логирование эксперимента, визуализация предсказаний и разбор ошибок. Вторая часть — дополнительный эксперимент с синтетикой для редких классов.
 
-1. Детектор: COCO-subset на 10 классов, fine-tuning DETR, TensorBoard, чекпойнты, profiler trace, mAP/mAP50, графики loss и разбор ошибок.
-2. Синтетика: crop-ы объектов из COCO, генерация дополнительных примеров через Stable Diffusion + ControlNet, сравнение CNN без синтетики и с синтетикой.
+Я не реализую полный DETR с нуля. В работе используется предобученный `facebook/detr-resnet-50`, а основной фокус сделан на полном экспериментальном цикле: подготовка данных, обучение, метрики, TensorBoard, checkpoint, визуализация bbox и error analysis. Такая постановка ближе к финальному мини-проекту, чем к отдельному семинарскому упражнению.
 
-Большие файлы сюда не кладу: COCO, чекпойнты, TensorBoard-логи и картинки генерируются командами ниже.
+## Связь с программой курса
+
+- Базовая работа с изображениями, визуализация и сохранение артефактов — темы первых семинаров.
+- ResNet/backbone используется внутри DETR как feature extractor.
+- Detection-часть опирается на bbox, IoU, mAP/mAP50 и анализ ошибок локализации.
+- DETR-часть связана с object queries, Hungarian matching и loss-компонентами `loss_ce`, `loss_bbox`, `loss_giou`.
+- По стилю эксперимента работа похожа на fine-tuning-пайплайны из тем Mask2Former/Grounding DINO: Colab/GPU, subset данных, checkpoint, визуализации и reproducibility.
+
+## Что сделано
+
+1. Подготовка COCO-subset на 10 классов.
+2. Fine-tuning DETR с логированием в TensorBoard.
+3. Сохранение `train_losses.csv`, `val_metrics.csv`, checkpoint и profiler trace.
+4. Графики loss-компонент.
+5. Визуализация предсказанных bbox.
+6. Error analysis: classification / localization / missed object / false positive.
+7. Дополнительный блок синтетики: crop-ы объектов, генерация через ControlNet и ablation `real only` vs `real + synthetic`.
+
+## Почему subset, а не полный COCO
+
+Полный COCO тяжёлый для Colab и учебного fine-tuning. Я беру 10 классов:
+
+```text
+person, bicycle, car, motorcycle, bus, truck, cat, dog, chair, bottle
+```
+
+Так задача остаётся настоящей object detection, но её можно прогнать на одной T4. После подготовки subset я отдельно смотрю распределение классов: частые классы вроде `person` доминируют, а `cat`, `dog`, `motorcycle` обычно оказываются редкими. Это нужно для честного анализа ошибок и для synthetic-эксперимента.
+
+## Сколько эпох запускать
+
+Есть три режима:
+
+| Режим | Эпохи | Для чего |
+|---|---:|---|
+| Debug | 1 | Проверить, что pipeline работает: loss пишется, checkpoint создаётся. |
+| Normal Colab | 5–10 | Получить первые осмысленные графики и визуализации. |
+| Strong run | 20–30 | Лучше для финальной сдачи, если хватает GPU-времени. |
+
+Важно: для предобученного DETR fine-tuning на маленьком subset 5 эпох могут быть достаточны как учебный запуск, но не как сильный финальный эксперимент. Если есть время, лучше запускать 20–30 эпох и смотреть не только число эпох, а динамику `val mAP/mAP50`. Если mAP перестала расти, дальше обучение не обязательно полезно.
+
+В Colab лучше сразу писать результаты в Google Drive:
+
+```bash
+--output-dir /content/drive/MyDrive/CV_HW_DETR_RUNS/detr_coco10
+```
+
+Иначе runtime может умереть и стереть `/content`.
 
 ## Установка
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-# Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-Для нормального обучения нужен GPU. На CPU имеет смысл запускать только маленький smoke-test.
+Проверка проекта:
 
-## Данные
+```bash
+python -m compileall -q src
+python src/make_toy_coco.py --out-root data/toy_coco
+python src/pick_rare_classes.py --data-root data/toy_coco --out-json reports/toy_class_distribution.json
+```
 
-Ожидаю обычную структуру COCO 2017:
+## Подготовка COCO-subset
+
+Ожидаемая структура COCO:
 
 ```text
 data/coco/
@@ -31,7 +79,7 @@ data/coco/
     instances_val2017.json
 ```
 
-## 1. COCO-subset
+Команда:
 
 ```bash
 python src/prepare_coco_subset.py \
@@ -41,102 +89,91 @@ python src/prepare_coco_subset.py \
   --max-train-images 1200 \
   --max-val-images 300 \
   --link-mode copy
+
+python src/pick_rare_classes.py \
+  --data-root data/coco10 \
+  --out-json reports/class_distribution.json
 ```
 
-В `data/coco10/annotations/id2label.json` классы ремапятся в `0..9`, чтобы голова DETR обучалась сразу на нужное число классов.
+## Обучение DETR
 
-Проверка распределения классов:
-
-```bash
-python src/pick_rare_classes.py --data-root data/coco10 --out-json reports/class_distribution.json
-```
-
-Этот файл полезно вставить в отчёт: видно, какие классы редкие и почему именно их беру для синтетики.
-
-## 2. Fine-tuning DETR
+Debug-запуск:
 
 ```bash
 python src/train_detr.py \
   --data-root data/coco10 \
   --model-name facebook/detr-resnet-50 \
-  --output-dir runs/detr_coco10 \
-  --epochs 5 \
+  --output-dir runs/detr_coco10_debug \
+  --epochs 1 \
   --batch-size 2 \
   --lr 1e-5 \
   --lr-backbone 1e-6 \
   --weight-decay 1e-4 \
-  --num-workers 4 \
+  --num-workers 2 \
   --profile
 ```
 
-После запуска должны появиться:
-
-```text
-runs/detr_coco10/
-  tb/
-  profiler/
-  train_losses.csv
-  val_metrics.csv
-  checkpoints/best.pt
-```
-
-TensorBoard:
+Финальный Colab-запуск в Drive:
 
 ```bash
-tensorboard --logdir runs/detr_coco10/tb
+python src/train_detr.py \
+  --data-root data/coco10 \
+  --model-name facebook/detr-resnet-50 \
+  --output-dir /content/drive/MyDrive/CV_HW_DETR_RUNS/detr_coco10 \
+  --epochs 20 \
+  --batch-size 2 \
+  --lr 1e-5 \
+  --lr-backbone 1e-6 \
+  --weight-decay 1e-4 \
+  --num-workers 2 \
+  --profile
 ```
 
-## 3. Графики loss
+Если запуск оборвался, можно продолжить с checkpoint:
+
+```bash
+python src/train_detr.py \
+  --data-root data/coco10 \
+  --output-dir /content/drive/MyDrive/CV_HW_DETR_RUNS/detr_coco10 \
+  --epochs 20 \
+  --resume /content/drive/MyDrive/CV_HW_DETR_RUNS/detr_coco10/checkpoints/epoch_005.pt
+```
+
+## Графики, визуализации и отчёт
 
 ```bash
 python src/plot_losses.py \
   --log-csv runs/detr_coco10/train_losses.csv \
   --out-dir reports/figures
-```
 
-## 4. Визуализация предсказаний
-
-```bash
 python src/visualize_predictions.py \
   --data-root data/coco10 \
   --checkpoint runs/detr_coco10/checkpoints/best.pt \
   --out-dir reports/figures/predictions \
   --num-images 24 \
-  --score-threshold 0.5
-```
+  --score-threshold 0.3
 
-## 5. Error analysis
-
-```bash
 python src/error_analysis.py \
   --data-root data/coco10 \
   --checkpoint runs/detr_coco10/checkpoints/best.pt \
   --out-dir reports/error_analysis \
-  --score-threshold 0.5 \
+  --score-threshold 0.3 \
   --iou-threshold 0.5
-```
 
-Скрипт разделяет ошибки на четыре группы:
+python src/summarize_run.py \
+  --run-dir runs/detr_coco10 \
+  --reports-dir reports \
+  --out-md reports/run_summary.md
 
-- `classification_error` — box попал в объект, но класс неверный;
-- `localization_error` — класс верный, но IoU ниже 0.5;
-- `missed_object` — объект в разметке есть, а предсказания нет;
-- `false_positive` — модель увидела лишний объект.
-
-## 6. HTML-демо для защиты
-
-После обучения и визуализаций:
-
-```bash
 python src/make_demo_report.py \
   --run-dir runs/detr_coco10 \
   --reports-dir reports \
   --out-file reports/demo_report.html
 ```
 
-Открой `reports/demo_report.html` в браузере. Там будут последние метрики, графики loss, примеры предсказаний и галерея ошибок. Это удобно показывать преподавателю без запуска ноутбука.
+## Синтетика и ablation
 
-## 7. Синтетика: crop-ы объектов
+Сначала извлекаются crop-ы объектов:
 
 ```bash
 python src/extract_classification_crops.py \
@@ -146,22 +183,18 @@ python src/extract_classification_crops.py \
   --max-per-class 700
 ```
 
-## 8. Генерация через Stable Diffusion + ControlNet
-
-Сначала выбери редкие классы по `reports/class_distribution.json`. Пример:
+Затем можно генерировать синтетику для редких классов:
 
 ```bash
 python src/generate_controlnet_synthetic.py \
   --input-root data/crops10/train \
   --output-root data/synth10 \
-  --classes bicycle motorcycle truck \
-  --num-per-class 80 \
+  --classes cat motorcycle dog \
+  --num-per-class 40 \
   --steps 25
 ```
 
-Важно: для ablation папка `data/synth10` должна иметь такие же подпапки классов, как `data/crops10/train`. Если синтетика сделана только для трёх классов, для остальных можно создать пустые папки или запускать классификационный ablation только на выбранном наборе классов.
-
-## 9. Ablation: real vs real+synthetic
+Ablation:
 
 ```bash
 python src/train_classifier_ablation.py \
@@ -171,36 +204,18 @@ python src/train_classifier_ablation.py \
   --epochs 8
 ```
 
-Результат: `runs/synthetic_ablation/ablation_metrics.csv`.
+Синтетика не обязана улучшать качество. Из-за domain gap она может ухудшить результат, поэтому здесь важен именно ablation, а не красивые картинки.
 
-## 10. Быстрая проверка без COCO
+## Что показывать на защите
 
-Чтобы проверить, что структура проекта живая:
+1. Структуру проекта.
+2. Smoke-test на toy COCO.
+3. Таблицу классов COCO-subset и дисбаланс.
+4. Параметры обучения DETR.
+5. TensorBoard / loss-графики.
+6. `val_metrics.csv` с `mAP/mAP50`.
+7. Примеры bbox-предсказаний.
+8. Error analysis.
+9. Synthetic-блок как дополнительный эксперимент.
 
-```bash
-python src/make_toy_coco.py --out-root data/toy_coco
-python src/pick_rare_classes.py --data-root data/toy_coco --out-json reports/toy_class_distribution.json
-```
-
-На toy-данных можно проверить чтение COCO-json, remap labels и генерацию служебных файлов. Полноценные метрики по DETR надо считать на настоящем COCO-subset.
-
-## Что вставлять в итоговый отчёт
-
-Минимальный набор:
-
-- параметры запуска: классы, train/val size, epochs, lr, batch size;
-- `val_metrics.csv` с mAP и mAP50;
-- два графика loss;
-- несколько изображений с предсказанными bbox;
-- `summary.json` из error analysis;
-- таблицу ablation для синтетики;
-- короткий вывод: где модель ошибается и помогла ли синтетика.
-
-## Мои ожидаемые наблюдения для отчёта
-
-Числа надо брать только после реального запуска. Текстовые выводы можно писать так:
-
-- DETR быстро начинает находить крупные и частые объекты, но на малом subset хуже работает с мелкими объектами и плотными сценами.
-- `loss_bbox` и `loss_giou` полезнее смотреть вместе: bbox loss может снижаться, пока IoU всё ещё нестабилен.
-- Ошибки локализации обычно появляются на частично закрытых объектах и объектах на границе кадра.
-- Синтетика не обязана всегда улучшать качество. Если synthetic images слишком «чистые», модель может переобучиться на другой домен. Поэтому в отчёте важен ablation, а не только красивые картинки.
+Главная идея работы: не просто запустить DETR, а собрать полный цикл CV-эксперимента — данные, обучение, метрики, визуализации, анализ ошибок и проверку гипотезы про синтетику.
