@@ -6,7 +6,7 @@ import numpy as np
 import torch
 from sklearn.metrics import accuracy_score, f1_score
 from torch import nn
-from torch.utils.data import ConcatDataset, DataLoader, Dataset, Dataset
+from torch.utils.data import ConcatDataset, DataLoader, Dataset
 from torch.utils.tensorboard import SummaryWriter
 from torchvision import datasets, models, transforms
 from tqdm import tqdm

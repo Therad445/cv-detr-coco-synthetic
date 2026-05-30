@@ -2,8 +2,8 @@
 
 Main files:
 
-- `project/src/` — source code for DETR training, visualization, error analysis and synthetic ablation.
-- `project/README.md` — experiment instructions.
+- `src/` — source code for DETR training, visualization, error analysis and synthetic ablation.
+- `README.md` — experiment instructions.
 - `reports/demo_report.html` — full visual report.
 - `reports/HW3_final_summary.md` — compact final summary.
 - `runs/detr_coco10/val_metrics.csv` — DETR validation metrics.
@@ -16,3 +16,5 @@ Main files:
 - `reports/figures/synthetic_examples/` — synthetic examples.
 
 Large raw datasets and model checkpoints are not included in Git.
+
+- `notebooks/hw3_detr_coco_synthetic_colab.ipynb` — final Colab notebook with Drive persistence, runtime recovery, training, visualization, error analysis, synthetic ablation and report packaging.
