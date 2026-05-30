@@ -1,0 +1,9 @@
+{
+  "total_errors": 1271,
+  "by_type": {
+    "missed_object": 154,
+    "false_positive": 976,
+    "localization_error": 119,
+    "classification_error": 22
+  }
+}

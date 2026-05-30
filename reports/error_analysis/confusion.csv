@@ -1,0 +1,16 @@
+gt_label,pred_label,count
+person,person,758
+bicycle,bicycle,13
+car,car,78
+car,truck,4
+motorcycle,person,2
+motorcycle,motorcycle,20
+bus,bus,1
+bus,truck,5
+truck,car,10
+truck,truck,13
+cat,cat,17
+dog,cat,1
+dog,dog,18
+bottle,bottle,36
+chair,chair,71

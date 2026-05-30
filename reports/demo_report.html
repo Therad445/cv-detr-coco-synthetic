@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>CV HW demo</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 36px; line-height: 1.45; color: #222; }
+h1, h2 { margin-bottom: 8px; }
+.card { border: 1px solid #ddd; border-radius: 12px; padding: 18px; margin: 18px 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+figure { margin: 0; border: 1px solid #eee; border-radius: 10px; padding: 8px; }
+img { max-width: 100%; border-radius: 8px; }
+figcaption { font-size: 12px; color: #666; margin-top: 6px; word-break: break-all; }
+.tbl { border-collapse: collapse; width: 100%; font-size: 14px; }
+.tbl th, .tbl td { border-bottom: 1px solid #eee; padding: 6px 8px; text-align: left; }
+.muted { color: #777; }
+pre { background: #f7f7f7; padding: 12px; border-radius: 8px; overflow-x: auto; }
+</style>
+</head>
+<body>
+<h1>DETR / COCO-subset: демонстрационный отчёт</h1>
+<p class="muted">Этот файл собирается автоматически из логов, графиков и картинок проекта.</p>
+
+<div class="card">
+<h2>Метрики валидации</h2>
+<table class="dataframe tbl">
+  <thead>
+    <tr style="text-align: right;">
+      <th>epoch</th>
+      <th>map</th>
+      <th>map_50</th>
+      <th>map_75</th>
+      <th>mar_100</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>21</td>
+      <td>0.231885</td>
+      <td>0.338139</td>
+      <td>0.249217</td>
+      <td>0.289605</td>
+    </tr>
+    <tr>
+      <td>22</td>
+      <td>0.262137</td>
+      <td>0.377142</td>
+      <td>0.275856</td>
+      <td>0.318900</td>
+    </tr>
+    <tr>
+      <td>23</td>
+      <td>0.289981</td>
+      <td>0.416793</td>
+      <td>0.298748</td>
+      <td>0.348371</td>
+    </tr>
+    <tr>
+      <td>24</td>
+      <td>0.313769</td>
+      <td>0.447725</td>
+      <td>0.340950</td>
+      <td>0.379679</td>
+    </tr>
+    <tr>
+      <td>25</td>
+      <td>0.314161</td>
+      <td>0.446417</td>
+      <td>0.335524</td>
+      <td>0.387686</td>
+    </tr>
+    <tr>
+      <td>26</td>
+      <td>0.327662</td>
+      <td>0.468868</td>
+      <td>0.353612</td>
+      <td>0.392946</td>
+    </tr>
+    <tr>
+      <td>27</td>
+      <td>0.327598</td>
+      <td>0.482545</td>
+      <td>0.325793</td>
+      <td>0.401037</td>
+    </tr>
+    <tr>
+      <td>28</td>
+      <td>0.316435</td>
+      <td>0.470321</td>
+      <td>0.334271</td>
+      <td>0.387171</td>
+    </tr>
+    <tr>
+      <td>29</td>
+      <td>0.330212</td>
+      <td>0.488585</td>
+      <td>0.341065</td>
+      <td>0.399417</td>
+    </tr>
+    <tr>
+      <td>30</td>
+      <td>0.355334</td>
+      <td>0.523353</td>
+      <td>0.369194</td>
+      <td>0.422141</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="card">
+<h2>Loss curves</h2>
+<div class="grid">
+<figure><img src="figures/total_loss.png"><figcaption>total loss</figcaption></figure>
+<figure><img src="figures/detr_loss_components.png"><figcaption>loss components</figcaption></figure>
+</div>
+</div>
+
+<div class="card">
+<h2>Предсказанные боксы</h2>
+<div class="grid"><figure><img src="figures/predictions/000000000724.jpg"><figcaption>000000000724.jpg</figcaption></figure>
+<figure><img src="figures/predictions/000000000785.jpg"><figcaption>000000000785.jpg</figcaption></figure>
+<figure><img src="figures/predictions/000000001490.jpg"><figcaption>000000001490.jpg</figcaption></figure>
+<figure><img src="figures/predictions/000000004495.jpg"><figcaption>000000004495.jpg</figcaption></figure>
+<figure><img src="figures/predictions/000000008021.jpg"><figcaption>000000008021.jpg</figcaption></figure>
+<figure><img src="figures/predictions/000000009483.jpg"><figcaption>000000009483.jpg</figcaption></figure>
+<figure><img src="figures/predictions/000000011197.jpg"><figcaption>000000011197.jpg</figcaption></figure>
+<figure><img src="figures/predictions/000000011813.jpg"><figcaption>000000011813.jpg</figcaption></figure>
+<figure><img src="figures/predictions/000000016228.jpg"><figcaption>000000016228.jpg</figcaption></figure>
+<figure><img src="figures/predictions/000000017627.jpg"><figcaption>000000017627.jpg</figcaption></figure>
+<figure><img src="figures/predictions/000000018150.jpg"><figcaption>000000018150.jpg</figcaption></figure>
+<figure><img src="figures/predictions/000000021167.jpg"><figcaption>000000021167.jpg</figcaption></figure>
+<figure><img src="figures/predictions/000000021903.jpg"><figcaption>000000021903.jpg</figcaption></figure>
+<figure><img src="figures/predictions/000000023899.jpg"><figcaption>000000023899.jpg</figcaption></figure>
+<figure><img src="figures/predictions/000000025560.jpg"><figcaption>000000025560.jpg</figcaption></figure>
+<figure><img src="figures/predictions/000000029393.jpg"><figcaption>000000029393.jpg</figcaption></figure></div>
+</div>
+
+<div class="card">
+<h2>Error analysis</h2>
+<pre>{
+  &quot;total_errors&quot;: 1271,
+  &quot;by_type&quot;: {
+    &quot;missed_object&quot;: 154,
+    &quot;false_positive&quot;: 976,
+    &quot;localization_error&quot;: 119,
+    &quot;classification_error&quot;: 22
+  }
+}</pre>
+<div class="grid"><figure><img src="error_analysis/examples/000_missed_object_000000000724.jpg"><figcaption>000_missed_object_000000000724.jpg</figcaption></figure>
+<figure><img src="error_analysis/examples/001_missed_object_000000008021.jpg"><figcaption>001_missed_object_000000008021.jpg</figcaption></figure>
+<figure><img src="error_analysis/examples/002_false_positive_000000009483.jpg"><figcaption>002_false_positive_000000009483.jpg</figcaption></figure>
+<figure><img src="error_analysis/examples/003_missed_object_000000011197.jpg"><figcaption>003_missed_object_000000011197.jpg</figcaption></figure>
+<figure><img src="error_analysis/examples/004_localization_error_000000011813.jpg"><figcaption>004_localization_error_000000011813.jpg</figcaption></figure>
+<figure><img src="error_analysis/examples/005_localization_error_000000016228.jpg"><figcaption>005_localization_error_000000016228.jpg</figcaption></figure>
+<figure><img src="error_analysis/examples/006_localization_error_000000017627.jpg"><figcaption>006_localization_error_000000017627.jpg</figcaption></figure>
+<figure><img src="error_analysis/examples/007_localization_error_000000023899.jpg"><figcaption>007_localization_error_000000023899.jpg</figcaption></figure>
+<figure><img src="error_analysis/examples/008_false_positive_000000033638.jpg"><figcaption>008_false_positive_000000033638.jpg</figcaption></figure>
+<figure><img src="error_analysis/examples/009_false_positive_000000034873.jpg"><figcaption>009_false_positive_000000034873.jpg</figcaption></figure>
+<figure><img src="error_analysis/examples/010_false_positive_000000037777.jpg"><figcaption>010_false_positive_000000037777.jpg</figcaption></figure>
+<figure><img src="error_analysis/examples/011_localization_error_000000038829.jpg"><figcaption>011_localization_error_000000038829.jpg</figcaption></figure>
+<figure><img src="error_analysis/examples/012_false_positive_000000039956.jpg"><figcaption>012_false_positive_000000039956.jpg</figcaption></figure>
+<figure><img src="error_analysis/examples/013_missed_object_000000043314.jpg"><figcaption>013_missed_object_000000043314.jpg</figcaption></figure>
+<figure><img src="error_analysis/examples/014_missed_object_000000050326.jpg"><figcaption>014_missed_object_000000050326.jpg</figcaption></figure>
+<figure><img src="error_analysis/examples/015_missed_object_000000053994.jpg"><figcaption>015_missed_object_000000053994.jpg</figcaption></figure></div>
+</div>
+<!-- SYNTHETIC_ABLATION_SECTION_START -->
+
+<div class="card">
+<h2>Synthetic data ablation</h2>
+<p class="muted">Дополнительная часть HW3: редкие классы усиливаются синтетическими изображениями, после чего сравнивается классификатор на real-only и real+synthetic.</p>
+
+<table border="1" class="dataframe tbl">
+  <thead>
+    <tr style="text-align: right;">
+      <th>experiment</th>
+      <th>train_data</th>
+      <th>epoch</th>
+      <th>accuracy</th>
+      <th>macro_f1</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>real_only</td>
+      <td>real crops only</td>
+      <td>2</td>
+      <td>0.848577</td>
+      <td>0.696259</td>
+    </tr>
+    <tr>
+      <td>real_plus_synthetic</td>
+      <td>real crops + ControlNet</td>
+      <td>4</td>
+      <td>0.826220</td>
+      <td>0.734213</td>
+    </tr>
+  </tbody>
+</table>
+<h3>Synthetic examples</h3>
+<div class="grid">
+<figure><img src="figures/synthetic_examples/bicycle_bicycle_synth_0000.png"><figcaption>bicycle_bicycle_synth_0000.png</figcaption></figure>
+<figure><img src="figures/synthetic_examples/bicycle_bicycle_synth_0001.png"><figcaption>bicycle_bicycle_synth_0001.png</figcaption></figure>
+<figure><img src="figures/synthetic_examples/bicycle_bicycle_synth_0002.png"><figcaption>bicycle_bicycle_synth_0002.png</figcaption></figure>
+<figure><img src="figures/synthetic_examples/bicycle_bicycle_synth_0003.png"><figcaption>bicycle_bicycle_synth_0003.png</figcaption></figure>
+<figure><img src="figures/synthetic_examples/bicycle_bicycle_synth_0004.png"><figcaption>bicycle_bicycle_synth_0004.png</figcaption></figure>
+<figure><img src="figures/synthetic_examples/bicycle_bicycle_synth_0005.png"><figcaption>bicycle_bicycle_synth_0005.png</figcaption></figure>
+<figure><img src="figures/synthetic_examples/bicycle_bicycle_synth_0006.png"><figcaption>bicycle_bicycle_synth_0006.png</figcaption></figure>
+<figure><img src="figures/synthetic_examples/bicycle_bicycle_synth_0007.png"><figcaption>bicycle_bicycle_synth_0007.png</figcaption></figure>
+<figure><img src="figures/synthetic_examples/bicycle_bicycle_synth_0008.png"><figcaption>bicycle_bicycle_synth_0008.png</figcaption></figure>
+<figure><img src="figures/synthetic_examples/bicycle_bicycle_synth_0009.png"><figcaption>bicycle_bicycle_synth_0009.png</figcaption></figure>
+<figure><img src="figures/synthetic_examples/bicycle_bicycle_synth_0010.png"><figcaption>bicycle_bicycle_synth_0010.png</figcaption></figure>
+<figure><img src="figures/synthetic_examples/bicycle_bicycle_synth_0011.png"><figcaption>bicycle_bicycle_synth_0011.png</figcaption></figure>
+<figure><img src="figures/synthetic_examples/bicycle_bicycle_synth_0012.png"><figcaption>bicycle_bicycle_synth_0012.png</figcaption></figure>
+<figure><img src="figures/synthetic_examples/bicycle_bicycle_synth_0013.png"><figcaption>bicycle_bicycle_synth_0013.png</figcaption></figure>
+<figure><img src="figures/synthetic_examples/bicycle_bicycle_synth_0014.png"><figcaption>bicycle_bicycle_synth_0014.png</figcaption></figure>
+<figure><img src="figures/synthetic_examples/bicycle_bicycle_synth_0015.png"><figcaption>bicycle_bicycle_synth_0015.png</figcaption></figure>
+<figure><img src="figures/synthetic_examples/bicycle_bicycle_synth_0016.png"><figcaption>bicycle_bicycle_synth_0016.png</figcaption></figure>
+<figure><img src="figures/synthetic_examples/bicycle_bicycle_synth_0017.png"><figcaption>bicycle_bicycle_synth_0017.png</figcaption></figure>
+</div>
+<h3>Final summary markdown</h3>
+<pre># HW3 Final Summary: DETR + Synthetic Data Ablation
+
+## Part 1: DETR on COCO-subset
+
+Dataset: COCO-subset, 10 classes.
+
+Classes:
+person, bicycle, car, motorcycle, bus, truck, cat, dog, bottle, chair.
+
+Train images: 1200  
+Validation images: 300  
+Model: facebook/detr-resnet-50  
+Epochs target: 30  
+Batch size: 2  
+Learning rate: 1e-5  
+Backbone learning rate: 1e-6  
+
+Final validation metrics:
+
+|   epoch |      map |   map_50 |   map_75 |   mar_100 |
+|--------:|---------:|---------:|---------:|----------:|
+|      30 | 0.355334 | 0.523353 | 0.369194 |  0.422141 |
+
+Best validation checkpoint by mAP:
+
+```json
+{
+  &quot;epoch&quot;: 30.0,
+  &quot;map&quot;: 0.3553341329097748,
+  &quot;map_50&quot;: 0.5233533978462219,
+  &quot;map_75&quot;: 0.3691941499710083,
+  &quot;mar_100&quot;: 0.4221411645412445
+}
+```
+
+Main observations:
+- DETR quality grows during training, especially after the first epochs.
+- Early epochs can have near-zero mAP; this is expected for DETR fine-tuning on a small subset.
+- mAP50 is higher than mAP because IoU=0.50 is a softer localization criterion.
+- Error analysis is included to show false positives, missed objects, localization errors and classification errors.
+
+Error-analysis summary:
+
+```json
+{
+  &quot;total_errors&quot;: 1271,
+  &quot;by_type&quot;: {
+    &quot;missed_object&quot;: 154,
+    &quot;false_positive&quot;: 976,
+    &quot;localization_error&quot;: 119,
+    &quot;classification_error&quot;: 22
+  }
+}
+```
+
+## Part 2: Synthetic Data with Stable Diffusion + ControlNet
+
+Rare classes selected for synthetic augmentation:
+bus, cat, bicycle
+
+Pipeline:
+1. Object crops were extracted from COCO bounding boxes.
+2. Synthetic images were generated for rare classes using Stable Diffusion + ControlNet.
+3. A classification ablation was run:
+   - baseline: real crops only;
+   - experiment: real crops + synthetic images.
+4. Metrics were compared to estimate whether synthetic augmentation helped.
+
+Ablation table:
+
+| experiment          | train_data              |   epoch |   accuracy |   macro_f1 |
+|:--------------------|:------------------------|--------:|-----------:|-----------:|
+| real_only           | real crops only         |       2 |   0.848577 |   0.696259 |
+| real_plus_synthetic | real crops + ControlNet |       4 |   0.82622  |   0.734213 |
+
+Interpretation:
+- Accuracy delta real+synthetic vs real-only: -0.0224.
+- Macro-F1 delta real+synthetic vs real-only: +0.0380.
+- If macro-F1 improves while accuracy slightly decreases, synthetic data is best interpreted as helping class balance rather than improving every aggregate metric.
+
+Conclusion:
+Synthetic data is treated as an experimental augmentation, not as guaranteed improvement. The effect is interpreted through the ablation table and qualitative examples.
+
+## Saved artifacts
+
+- DETR checkpoints: `runs/detr_coco10/checkpoints/`
+- TensorBoard logs: `runs/detr_coco10/tb/`
+- Profiler trace: `runs/detr_coco10/profiler/`
+- DETR metrics: `runs/detr_coco10/val_metrics.csv`
+- Loss logs: `runs/detr_coco10/train_losses.csv`
+- Prediction gallery: `reports/figures/predictions/`
+- Error analysis: `reports/error_analysis/`
+- Synthetic examples: `reports/figures/synthetic_examples/`
+- Synthetic ablation: `runs/synthetic_ablation/` and `reports/synthetic_ablation_metrics.csv`
+</pre>
+</div>
+<!-- SYNTHETIC_ABLATION_SECTION_END -->
+</body>
+</html>

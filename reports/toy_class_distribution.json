@@ -1,0 +1,24 @@
+{
+  "classes": [
+    {
+      "class": "blue_circle",
+      "train_boxes": 12,
+      "val_boxes": 4
+    },
+    {
+      "class": "green_triangle",
+      "train_boxes": 12,
+      "val_boxes": 4
+    },
+    {
+      "class": "red_square",
+      "train_boxes": 12,
+      "val_boxes": 4
+    }
+  ],
+  "rare_classes_suggestion": [
+    "blue_circle",
+    "green_triangle",
+    "red_square"
+  ]
+}

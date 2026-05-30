@@ -1,0 +1,59 @@
+{
+  "classes": [
+    {
+      "class": "bus",
+      "train_boxes": 74,
+      "val_boxes": 13
+    },
+    {
+      "class": "cat",
+      "train_boxes": 76,
+      "val_boxes": 19
+    },
+    {
+      "class": "bicycle",
+      "train_boxes": 82,
+      "val_boxes": 19
+    },
+    {
+      "class": "dog",
+      "train_boxes": 111,
+      "val_boxes": 21
+    },
+    {
+      "class": "truck",
+      "train_boxes": 144,
+      "val_boxes": 27
+    },
+    {
+      "class": "motorcycle",
+      "train_boxes": 147,
+      "val_boxes": 26
+    },
+    {
+      "class": "bottle",
+      "train_boxes": 337,
+      "val_boxes": 53
+    },
+    {
+      "class": "chair",
+      "train_boxes": 498,
+      "val_boxes": 143
+    },
+    {
+      "class": "car",
+      "train_boxes": 603,
+      "val_boxes": 102
+    },
+    {
+      "class": "person",
+      "train_boxes": 3582,
+      "val_boxes": 897
+    }
+  ],
+  "rare_classes_suggestion": [
+    "bus",
+    "cat",
+    "bicycle"
+  ]
+}

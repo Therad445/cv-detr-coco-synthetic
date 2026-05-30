@@ -1,0 +1,3 @@
+experiment,train_data,epoch,accuracy,macro_f1
+real_only,real crops only,2,0.8485772357723578,0.6962585164558008
+real_plus_synthetic,real crops + ControlNet,4,0.8262195121951219,0.7342134434220381
